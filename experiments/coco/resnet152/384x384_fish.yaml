@@ -10,13 +10,13 @@ DATASET:
   ROOT: 'data/fish/'
   FOLDER: 'fish22.6.17'
   TEST_SET: 'fish_blank_2400'
-  TRAIN_SET: 'fish22.6.17'
+  TRAIN_SET: 'fish_7.11_coco'
   FLIP: true
   ROT_FACTOR: 40
   SCALE_FACTOR: 0.3
 MODEL:
   NAME: 'pose_resnet'
-  PRETRAINED: 'models/pytorch/imagenet/resnet152-b121ed2d.tar'
+  PRETRAINED: 'models/pytorch/imagenet/resnet152-b121ed2d.pth'
   IMAGE_SIZE:
   - 384
   - 384

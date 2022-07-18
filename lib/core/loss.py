@@ -9,6 +9,7 @@ from __future__ import division
 from __future__ import print_function
 
 import torch.nn as nn
+import torch
 
 
 class JointsMSELoss(nn.Module):
@@ -36,3 +37,22 @@ class JointsMSELoss(nn.Module):
                 loss += 0.5 * self.criterion(heatmap_pred, heatmap_gt)
 
         return loss / num_joints
+
+class HeatmapLoss(nn.Module):
+    """
+    loss for detection heatmap
+    """
+    def __init__(self):
+        super(HeatmapLoss, self).__init__()
+
+    def forward(self, pred, gt):
+        l = ((pred - gt)**2)
+        l = l.mean(dim=3).mean(dim=2).mean(dim=1)
+        return l ## l of dim bsize
+
+def calc_loss(self, combined_hm_preds, heatmaps):
+    combined_loss = []
+    for i in range(self.nstack):
+        combined_loss.append(self.heatmapLoss(combined_hm_preds[0][:,i], heatmaps))
+    combined_loss = torch.stack(combined_loss, dim=1)
+    return combined_loss

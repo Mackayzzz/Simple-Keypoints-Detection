@@ -8,23 +8,25 @@ PRINT_FREQ: 1
 DATASET:
   DATASET: 'coco'
   ROOT: 'data/fish/'
-  TEST_SET: 'val2017'
-  TRAIN_SET: 'train2017'
+  FOLDER: 'fish22.6.17'
+  TEST_SET: 'fish_blank_2400'
+  TRAIN_SET: 'fish_7.11_coco'
   FLIP: true
   ROT_FACTOR: 40
   SCALE_FACTOR: 0.3
 MODEL:
   NAME: 'pose_resnet'
-  PRETRAINED: 'models/pytorch/imagenet/resnet50-19c8e357.pth'
+  PRETRAINED: 'models/pytorch/imagenet/resnet152-b121ed2d.tar'
   IMAGE_SIZE:
-  - 384
-  - 384
+  - 256
+  - 256
   NUM_JOINTS: 9
+  N_STACK: 4
   EXTRA:
     TARGET_TYPE: 'gaussian'
     HEATMAP_SIZE:
-    - 96
-    - 96
+    - 64
+    - 64
     SIGMA: 3
     FINAL_CONV_KERNEL: 1
     DECONV_WITH_BIAS: false
@@ -37,18 +39,18 @@ MODEL:
     - 4
     - 4
     - 4
-    NUM_LAYERS: 50
+    NUM_LAYERS: 152
 LOSS:
   USE_TARGET_WEIGHT: true
 TRAIN:
   BATCH_SIZE: 16
   SHUFFLE: true
   BEGIN_EPOCH: 0
-  END_EPOCH: 300
+  END_EPOCH: 200
   RESUME: false
   OPTIMIZER: 'adam'
   LR: 0.0001
-  LR_FACTOR: 0.01
+  LR_FACTOR: 0.1
   LR_STEP:
   - 50
   - 100
@@ -64,7 +66,7 @@ TEST:
   FLIP_TEST: false
   IMAGE_THRE: 0.0
   IN_VIS_THRE: 0.2
-  MODEL_FILE: ''
+  MODEL_FILE: 'models/pytorch/trained/final_state.pth.tar'
   NMS_THRE: 1.0
   OKS_THRE: 0.9
   USE_GT_BBOX: true
