@@ -84,7 +84,7 @@ experiments/coco/
 ```
 DATASET:
   DATASET: 'coco'
-  ROOT: 'data/fish/'				#数据集路径
+  ROOT: 'data/fish/'				   #数据集路径
   FOLDER: 'fish22.6.17'				#图片文件夹
   TEST_SET: 'fish_blank_2400'		#测试label文件名（coco格式）
   TRAIN_SET: 'fish_7.11_coco'		#训练label文件名（coco格式）
@@ -109,8 +109,8 @@ TEST:
     "images": [
         {
             "file_name": "IMG_20220318_093630.jpg",
-            "id": 1,									#图片id，每张图片需要不同
-            "height": 5616,								#图片大小
+            "id": 1,									        #图片id，每张图片需要不同
+            "height": 5616,								  #图片大小
             "width": 2592
         },
         ·
@@ -123,15 +123,15 @@ TEST:
             "bbox": [
                 1053.99,							#检测框左上坐标x
                 1056.258,							#y
-                1109.7430000000002,					#长
-                4851.512000000001					#宽
+                1109.7430000000002,				#长
+                4851.512000000001				#宽
             ],
             "image_id": 1,							#图片id
             "category_id": 1,
             "id": 1,
-            "area": 5383931.481416002,				#长×宽
+            "area": 5383931.481416002,			#长×宽
             "keypoints": [							#关键点坐标，若点在图片外第三维为0，
-                1525.89,                             若为预测标签，第三维全为2，点坐标随意
+                1525.89,                      若为预测标签，第三维全为2，点坐标随意
                 1173.62,
                 2,
                 1662.9,
@@ -145,7 +145,7 @@ TEST:
                 ·
                 ·
             ],
-            "num_keypoints": 9							#点的数量
+            "num_keypoints": 9					#点的数量
         },
         ·
         ·
@@ -157,7 +157,7 @@ TEST:
             "supercategory": "person",
             "id": 1,
             "name": "person",
-            "keypoints": [								#修改点名称，其余直接复制
+            "keypoints": [							#修改点名称，其余直接复制
                 "Eh",
                 "Et"
             ],
