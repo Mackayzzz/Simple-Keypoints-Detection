@@ -99,6 +99,7 @@ MODEL:
 TEST:
   MODEL_FILE: 'models/pytorch/trained/final_state.pth.tar'  #保存的权重文件路径
 ```
+其余的训练参数均可自行调节
 
 ### COCO json
 
