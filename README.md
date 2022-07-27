@@ -1,6 +1,9 @@
 # Simple Keypoints Detection
 
-[论文地址]([[1804.06208\] Simple Baselines for Human Pose Estimation and Tracking (arxiv.org)](https://arxiv.org/abs/1804.06208))
+
+[[1804.06208\] Simple Baselines for Human Pose Estimation and Tracking (arxiv.org)](https://arxiv.org/abs/1804.06208)
+
+[[1603.06937\] Stacked Hourglass Networks for Human Pose Estimation (arxiv.org)](https://arxiv.org/abs/1603.06937)
 
 ## Quick start
 
