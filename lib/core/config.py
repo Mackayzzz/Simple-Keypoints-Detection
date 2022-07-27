@@ -221,7 +221,8 @@ def get_model_name(cfg):
             name=name,
             deconv_suffix=deconv_suffix)
     else:
-        raise ValueError('Unkown model: {}'.format(cfg.MODEL))
+        return name, full_name
+        # raise ValueError('Unkown model: {}'.format(cfg.MODEL))
 
     return name, full_name
 

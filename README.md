@@ -1,21 +1,19 @@
 # Simple Keypoints Detection
 
-暂仅支持Simple Baselines模型
-
 [论文地址]([[1804.06208\] Simple Baselines for Human Pose Estimation and Tracking (arxiv.org)](https://arxiv.org/abs/1804.06208))
 
 ## Quick start
 
 ### Installation
-1. 安装python>=3.6; pytorch >= v1.0.0 following.
+1. 安装python>=3.6; pytorch >= v1.0.0
 
 2. 安装依赖:
-   ```
+   ```bash
    pip install -r requirements.txt
    ```
    
 3. 安装 [COCOAPI](https://github.com/cocodataset/cocoapi):
-   ```
+   ```bash
    # COCOAPI=/path/to/clone/cocoapi
    git clone https://github.com/cocodataset/cocoapi.git $COCOAPI
    cd $COCOAPI/PythonAPI
@@ -35,7 +33,7 @@
 
    [resnet152](http://download.pytorch.org/models/resnet152-b121ed2d.pth)
 
-   ```
+   ```bash
    ${POSE_ROOT}
     `-- models
         `-- pytorch
@@ -49,14 +47,14 @@
 
 5. Init output(training model output directory) and log(tensorboard log directory) directory:
 
-   ```
+   ```bash
    mkdir output 
    mkdir log
    ```
 
    Your directory tree should look like this:
 
-   ```
+   ```bash
    ${POSE_ROOT}
    ├── data
    │   └── fish
@@ -75,13 +73,20 @@
    ```
 
 ### Data preparation
-
-
+```bash
+   ${POSE_ROOT}
+   └── data
+       └── fish
+           ├── annotations
+           │   └── fish_7.11_coco.json
+           └── images
+               └── fish22.6.17
+```
 ### Yaml Setting
 
 experiments/coco/
 
-```
+```yaml
 DATASET:
   DATASET: 'coco'
   ROOT: 'data/fish/'                #数据集路径
@@ -90,12 +95,14 @@ DATASET:
   TRAIN_SET: 'fish_7.11_coco'       #训练label文件名（coco格式）
 ```
 
-```
+```yaml
 MODEL:
+  NAME: 'pose_resnet'               #可选['pose_renet', 'hourglass']
   NUM_JOINTS: 9                     #点的数量
+  N_STACK: 8                        #Hourglass堆叠数量
 ```
 
-```
+```yaml
 TEST:
   MODEL_FILE: 'models/pytorch/trained/final_state.pth.tar'  #保存的权重文件路径
 ```
@@ -105,7 +112,7 @@ TEST:
 
 将自己的标签转化成coco格式，预测使用的json可以没有关键点坐标数据，只需要有bbox(检测框)
 
-```
+```json
 {
     "images": [
         {
@@ -123,16 +130,16 @@ TEST:
             "iscrowd": 0,
             "bbox": [
                 1053.99,                    #检测框左上坐标x
-                1056.258,                   #y
-                1109.7430000000002,         #长
-                4851.512000000001           #宽
+                1056.258,                   #坐标y
+                1109.7430000000002,         #宽width
+                4851.512000000001           #高height
             ],
             "image_id": 1,                  #图片id
             "category_id": 1,
             "id": 1,
-            "area": 5383931.481416002,      #长×宽
+            "area": 5383931.481416002,      #宽×高
             "keypoints": [                  #关键点坐标，若点在图片外第三维为0，
-                1525.89,                    若为预测标签，第三维全为2，点坐标随意
+                1525.89,                    若为预测标签，第三维全为2，点坐标为0
                 1173.62,
                 2,
                 1662.9,
@@ -245,18 +252,31 @@ TEST:
 }
 ```
 
-### Train
+## Train
 
-```
+SimpleBaseline
+```bash
 python pose_estimation/train.py \
     --cfg experiments/coco/resnet152/384x384_fish.yaml
 ```
 
-### Predict
-
+StackedHourglass
+```bash
+python pose_estimation/trainHG.py \
+    --cfg experiments/coco/hourglass/4stacks_fish.yaml
 ```
+
+## Predict
+SimpleBaseline
+```bash
 python pose_estimation/predict.py \
     --cfg experiments/coco/resnet152/384x384_fish.yaml
+```
+
+StackedHourglass
+```bash
+python pose_estimation/predictHG.py \
+    --cfg experiments/coco/hourglass/4stacks_fish.yaml
 ```
 
 自行修改yaml路径

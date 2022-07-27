@@ -1,7 +1,3 @@
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
-
 import argparse
 import os
 import pprint
@@ -21,29 +17,32 @@ from core.config import config
 from core.config import update_config
 from core.config import update_dir
 from core.config import get_model_name
-from core.loss import JointsMSELoss
+from core.loss import JointsMSELoss, HeatmapLoss
 from core.function import train, trainHG
 from core.function import validate
 from utils.utils import get_optimizer
 from utils.utils import save_checkpoint
 from utils.utils import create_logger
 
+from models.hourglass import PoseNet
 import dataset
 import models
 
+os.environ['CUDA_LAUNCH_BLOCKING'] = '1'
 
 def parse_args():
     parser = argparse.ArgumentParser(description='Train keypoints network')
     # general
     parser.add_argument('--cfg',
                         help='experiment configure file name',
-                        default='experiments/coco/resnet152/384x384_eyes.yaml',
+                        # required=True,
+                        default='experiments/coco/hourglass/8stacks_fish.yaml',
                         type=str)
 
+    
     args, rest = parser.parse_known_args()
     # update config
     update_config(args.cfg)
-
     # training
     parser.add_argument('--frequent',
                         help='frequency of logging',
@@ -83,15 +82,15 @@ def main():
     torch.backends.cudnn.deterministic = config.CUDNN.DETERMINISTIC
     torch.backends.cudnn.enabled = config.CUDNN.ENABLED
 
-    model = eval('models.'+config.MODEL.NAME+'.get_pose_net')(
-        config, is_train=True
-    )
+    model = PoseNet(
+        nstack=config.MODEL.N_STACK, inp_dim=256, oup_dim=config.MODEL.NUM_JOINTS
+    ).cuda()
 
     # copy model file
     this_dir = os.path.dirname(__file__)
-    shutil.copy2(
-        os.path.join(this_dir, '../lib/models', config.MODEL.NAME + '.py'),
-        final_output_dir)
+    # shutil.copy2(
+    #     os.path.join(this_dir, '../lib/models', config.MODEL.NAME + '.py'),
+    #     final_output_dir)
 
     writer_dict = {
         'writer': SummaryWriter(log_dir=tb_log_dir),
@@ -99,19 +98,20 @@ def main():
         'valid_global_steps': 0,
     }
 
-    dump_input = torch.rand((config.TRAIN.BATCH_SIZE,
-                             3,
-                             config.MODEL.IMAGE_SIZE[1],
-                             config.MODEL.IMAGE_SIZE[0]))
-    writer_dict['writer'].add_graph(model, (dump_input, ), verbose=False)
-    if config.MODEL.NAME != "hourglass":
-        gpus = [int(i) for i in config.GPUS.split(',')]
-        model = torch.nn.DataParallel(model, device_ids=gpus).cuda()
+    # dump_input = torch.rand((config.TRAIN.BATCH_SIZE,
+    #                          3,
+    #                          config.MODEL.IMAGE_SIZE[1],
+    #                          config.MODEL.IMAGE_SIZE[0]))
+    # writer_dict['writer'].add_graph(model, (dump_input, ), verbose=False)
+
+    gpus = [int(i) for i in config.GPUS.split(',')]
+    # model = torch.nn.DataParallel(model, device_ids=gpus).cuda()
 
     # define loss function (criterion) and optimizer
-    criterion = JointsMSELoss(
-        use_target_weight=config.LOSS.USE_TARGET_WEIGHT
-    ).cuda()
+    # criterion = JointsMSELoss(
+    #     use_target_weight=config.LOSS.USE_TARGET_WEIGHT
+    # ).cuda()
+    criterion = HeatmapLoss().cuda()
 
     optimizer = get_optimizer(config, model)
 
@@ -132,16 +132,16 @@ def main():
             normalize,
         ])
     )
-    valid_dataset = dataset.coco(
-        config,
-        config.DATASET.ROOT,
-        config.DATASET.TEST_SET,
-        False,
-        transforms.Compose([
-            transforms.ToTensor(),
-            normalize,
-        ])
-    )
+    # valid_dataset = dataset.coco(
+    #     config,
+    #     config.DATASET.ROOT,
+    #     config.DATASET.TEST_SET,
+    #     False,
+    #     transforms.Compose([
+    #         transforms.ToTensor(),
+    #         normalize,
+    #     ])
+    # )
 
     train_loader = torch.utils.data.DataLoader(
         train_dataset,
@@ -150,19 +150,19 @@ def main():
         num_workers=config.WORKERS,
         pin_memory=True
     )
-    valid_loader = torch.utils.data.DataLoader(
-        valid_dataset,
-        batch_size=config.TEST.BATCH_SIZE*len(gpus),
-        shuffle=False,
-        num_workers=config.WORKERS,
-        pin_memory=True
-    )
+    # valid_loader = torch.utils.data.DataLoader(
+    #     valid_dataset,
+    #     batch_size=config.TEST.BATCH_SIZE*len(gpus),
+    #     shuffle=False,
+    #     num_workers=config.WORKERS,
+    #     pin_memory=True
+    # )
 
     best_perf = 0.0
     best_model = False
     for epoch in range(config.TRAIN.BEGIN_EPOCH, config.TRAIN.END_EPOCH):
         lr_scheduler.step()
-        train(config, train_loader, model, criterion, optimizer, epoch,
+        trainHG(config, train_loader, model, criterion, optimizer, epoch,
             final_output_dir, tb_log_dir, writer_dict)
 
 
@@ -191,7 +191,7 @@ def main():
                                           'final_state.pth.tar')
     logger.info('saving final model state to {}'.format(
         final_model_state_file))
-    torch.save(model.module.state_dict(), final_model_state_file)
+    torch.save(model.state_dict(), final_model_state_file)
     writer_dict['writer'].close()
 
 
