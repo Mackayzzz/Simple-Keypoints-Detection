@@ -3,7 +3,7 @@ opencv-python==3.4.8.29
 Cython
 scipy
 pandas
-pyyaml
+pyyaml==5.4
 json_tricks
 scikit-image
 tensorboardX>=1.2
